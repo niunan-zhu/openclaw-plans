@@ -216,12 +216,12 @@ scripts/
     │   │   ├── sohu.js        # 搜狐
     │   │   ├── douyin.js      # 抖音
     │   │   └── bilibili.js    # B站
-    │   ├── storage.js         # SQLite 存储
+    │   ├── storage.js         # JSON 文件存储
     │   ├── deduplication.js   # 去重
     │   ├── reporter.js        # 报告生成
     │   └── index.js           # 入口
-    └── output/
-        └── reports/           # 报告输出
+    └── data/
+        └── reports/           # JSON 数据 + 报告
 ```
 
 ### 核心流程
@@ -243,7 +243,7 @@ scripts/
     └── B站 ──► B站 API
     │
     ▼
-数据存储 (SQLite)
+存储 JSON 文件
     │
     ▼
 去重 + 分类
@@ -261,12 +261,46 @@ scripts/
 {
   "dependencies": {
     "playwright": "^1.40.0",
-    "better-sqlite3": "^9.2.0",
-    "nodemailer": "^6.9.0",
     "axios": "^1.6.0",
     "dotenv": "^16.3.0"
   }
 }
+```
+
+---
+
+## 三、存储结构
+
+### JSON 文件存储
+
+```
+data/
+└── 2026-02-15.json
+```
+
+```json
+{
+  "date": "2026-02-15",
+  "articles": [
+    {
+      "id": "1",
+      "title": "FIFISH 发布新一代水下机器人",
+      "url": "https://...",
+      "source": "微信公众号",
+      "platform": "搜狗微信",
+      "keyword": "水下机器人",
+      "category": "brand",
+      "pubTime": "2026-02-15 10:30:00",
+      "summary": "..."
+    }
+  ]
+}
+```
+
+### 报告生成流程
+
+```
+JSON 数据 ──► 模板渲染 ──► Markdown 报告
 ```
 
 ---
