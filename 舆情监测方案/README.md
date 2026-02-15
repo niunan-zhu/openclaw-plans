@@ -168,7 +168,7 @@ const data = await page.evaluate(() => {
 
 ### 6. B站（哔哩哔哩）
 
-#### 方案：B站开放 API（推荐）
+#### 方案 A：B站开放 API（推荐）
 
 | 项目 | 说明 |
 |------|------|
@@ -181,6 +181,35 @@ const data = await page.evaluate(() => {
 1. 调用 B站搜索 API
 2. 解析返回 JSON
 3. 提取：标题、链接、作者、发布时间、简介
+```
+
+#### 方案 B：B站 AI 总结（@有趣的程序员）
+
+| 项目 | 说明 |
+|------|------|
+| UP主 | 有趣的程序员 |
+| 原理 | @该 UP 主让 AI 总结视频内容 |
+| 限制 | 需要 B站登录 Cookie 发评论 |
+
+**流程：**
+```
+1. 获取目标视频 URL
+2. 登录 B站账号（Cookie）
+3. 发送评论 @有趣的程序员 + 视频链接
+4. 定时抓取该评论的回复
+5. 提取 AI 总结内容
+```
+
+**实现：**
+```javascript
+// 1. 发评论
+await page.goto(videoUrl);
+await page.type('.comment-input', `@有趣的程序员 ${videoUrl}`);
+await page.click('.submit-btn');
+
+// 2. 抓取回复（定时任务）
+const replies = await bilibili.getReplies(commentId);
+const aiSummary = replies.find(r => r.user === '有趣的程序员');
 ```
 
 **代码实现：**
@@ -215,7 +244,8 @@ scripts/
     │   │   ├── toutiao.js     # 今日头条
     │   │   ├── sohu.js        # 搜狐
     │   │   ├── douyin.js      # 抖音
-    │   │   └── bilibili.js    # B站
+    │   │   ├── bilibili.js    # B站搜索
+│   │   └── bilibili-ai.js # B站 AI 总结
     │   ├── storage.js         # JSON 文件存储
     │   ├── deduplication.js   # 去重
     │   ├── reporter.js        # 报告生成
@@ -240,7 +270,9 @@ scripts/
     ├── 头条号 ──► 头条搜索
     ├── 搜狐号 ──► 搜狐搜索
     ├── 抖音 ──► 抖音网页
-    └── B站 ──► B站 API
+    ├── B站搜索 ──► B站 API
+    │
+    └── B站 AI ──► @有趣的程序员 ──► 抓取回复
     │
     ▼
 存储 JSON 文件
@@ -427,6 +459,7 @@ JSON 数据 ──► 模板渲染 ──► Markdown 报告
 | 搜狐号 | 3 篇 |
 | 抖音 | 6 条 |
 | B站 | 4 条 |
+| B站 AI 总结 | 2 条 |
 
 ---
 
@@ -469,11 +502,11 @@ JSON 数据 ──► 模板渲染 ──► Markdown 报告
 
 ### 视频内容总结
 
-**[抖音] 水下机器人行业分析**
-- **来源**：抖音 - 科技评测 **[5]**
-- **AI 摘要**：视频介绍了水下机器人在海洋科研领域的应用...
+**[B站 AI] 水下机器人行业分析**
+- **来源**：B站 - 有趣的程序员 **[6]**
+- **AI 总结**：本视频介绍了水下机器人在海洋科研领域的最新应用...
 
-**[5]** https://www.douyin.com/...
+**[6]** https://www.bilibili.com/...
 
 ---
 
@@ -494,6 +527,7 @@ JSON 数据 ──► 模板渲染 ──► Markdown 报告
 | 3 | 今日头条 | https://www.toutiao.com/... |
 | 4 | B站 | https://www.bilibili.com/... |
 | 5 | 抖音 | https://www.douyin.com/... |
+| 6 | B站 AI 总结 | https://www.bilibili.com/... |
 
 ---
 
@@ -584,7 +618,8 @@ const summary = await llm.summarize({
 | Day 1-2 | 项目 搜狗微信抓取 |
 | Day 3-4 | 百度百家号 + 今日头条 |
 | Day 5 | 搜狐号 + B站 API |
-| Day 6-7 | 数据存储框架 + + 去重 |
+| Day 6 | B站 AI 总结 (@有趣的程序员) |
+| Day 7 | 数据存储 + 去重 |
 
 ### Week 2：自动化
 
