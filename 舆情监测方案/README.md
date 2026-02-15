@@ -6,7 +6,7 @@
 
 - **目标**：每日自动抓取品牌、竞品、行业动态，整理为结构化报告
 - **范围**：公众号、百家号、头条号、搜狐号、抖音、B站
-- **推送**：邮件
+- **推送**：企业微信
 
 ---
 
@@ -252,7 +252,7 @@ scripts/
 生成 Markdown 报告
     │
     ▼
-发送邮件
+发送企业微信
 ```
 
 ### 依赖
@@ -269,7 +269,69 @@ scripts/
 
 ---
 
-## 三、存储结构
+## 三、企业微信推送
+
+### 方式：企业微信 Webhook 机器人
+
+| 项目 | 说明 |
+|------|------|
+| 入口 | 企业微信群 → 设置 → 添加机器人 |
+| Webhook URL | https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxx |
+| 限制 | 每次消息 ≤ 20KB |
+
+### 消息类型
+
+支持 Markdown、文本、图片：
+
+```javascript
+// Markdown 消息（推荐）
+const message = {
+  msgtype: "markdown",
+  markdown: {
+    content: "# 市场舆情日报\n\n> 数据概览\n- 微信: 12篇\n- 百度: 8篇"
+  }
+};
+
+// 图片消息
+const message = {
+  msgtype: "image",
+  image: {
+    base64: "图片base64",
+    md5: "图片md5"
+  }
+};
+```
+
+### 实现代码
+
+```javascript
+const axios = require('axios');
+
+async function sendToWechat(message) {
+  const webhookUrl = process.env.WEBHOOK_URL;
+  
+  await axios.post(webhookUrl, {
+    msgtype: "markdown",
+    markdown: {
+      content: message
+    }
+  });
+}
+
+// 发送报告
+await sendToWechat(reportContent);
+```
+
+### 配置
+
+```bash
+# .env
+WEBHOOK_URL=https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=你的机器人key
+```
+
+---
+
+## 四、存储结构
 
 ### JSON 文件存储
 
